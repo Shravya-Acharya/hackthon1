@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Mentorship Slots - Placement Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar" style="background: linear-gradient(135deg, #48c78e 0%, #257953 100%);">
+            <h4 class="mb-4"><i class="fas fa-user-graduate"></i> Student</h4>
+            <a href="/student/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/student/build-resume"><i class="fas fa-file-alt"></i> Build Resume</a>
+            <a href="/student/live-feed"><i class="fas fa-rss"></i> Live Feed</a>
+            <a href="/student/application-tracker"><i class="fas fa-chart-line"></i> Applications</a>
+            <a href="/student/job-referrals"><i class="fas fa-briefcase"></i> Job Referrals</a>
+            <a href="/student/mentorship-slots" class="active"><i class="fas fa-handshake"></i> Mentorship</a>
+            <a href="/analyst/skill-gap-analysis"><i class="fas fa-chart-pie"></i> Skill Gap</a>
+            <a href="/logout"><i class="fas fa-sign-out"></i> Logout</a>
+        </div>
+        
+        <div class="col-md-10 main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Mentorship Slots</h2>
+                <a href="/student/my-mentorships" class="btn btn-outline-success">
+                    <i class="fas fa-calendar-check"></i> My Booked Sessions
+                </a>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <!-- Filter Section -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="searchTopic" placeholder="Search by topic..." onkeyup="filterSlots()">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="date" class="form-control" id="filterDate" onchange="filterSlots()">
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="filterAlumni" onchange="filterSlots()">
+                                <option value="">All Alumni</option>
+                                {% for slot in slots %}
+                                    {% set alumni = slot.alumni %}
+                                    <option value="{{ alumni.username }}">{{ alumni.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Available Slots -->
+            <div class="row" id="slotsContainer">
+                {% if slots %}
+                    {% for slot in slots %}
+                        {% set alumni = slot.alumni %}
+                        <div class="col-md-4 mb-4 slot-card" 
+                             data-topic="{{ slot.topic|lower }}"
+                             data-date="{{ slot.date.strftime('%Y-%m-%d') }}"
+                             data-alumni="{{ alumni.username|lower }}">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0"><i class="fas fa-chalkboard-teacher"></i> Mentorship Session</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center mb-3">
+                                        <div class="avatar-circle mb-2">
+                                            <span class="initials">{{ alumni.username[:2]|upper }}</span>
+                                        </div>
+                                        <h4>{{ alumni.username }}</h4>
+                                        <span class="badge bg-info">Alumni</span>
+                                    </div>
+                                    
+                                    <hr>
+                                    
+                                    <div class="mb-3">
+                                        <p><i class="fas fa-tag text-success me-2"></i> <strong>Topic:</strong> {{ slot.topic }}</p>
+                                        <p><i class="fas fa-calendar text-success me-2"></i> <strong>Date:</strong> {{ slot.date.strftime('%d %B, %Y') }}</p>
+                                        <p><i class="fas fa-clock text-success me-2"></i> <strong>Duration:</strong> 1 Hour</p>
+                                    </div>
+                                    
+                                    <div class="alumni-details mb-3">
+                                        <h6>About Mentor:</h6>
+                                        <p class="text-muted small">
+                                            <i class="fas fa-graduation-cap me-2"></i> {{ alumni.branch or 'Engineering' }} Graduate<br>
+                                            <i class="fas fa-briefcase me-2"></i> Working Professional<br>
+                                            <i class="fas fa-star me-2"></i> 5+ Years Experience
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="d-grid">
+                                        <button class="btn btn-success" onclick="confirmBooking('{{ slot.id }}', '{{ slot.topic|escape }}', '{{ alumni.username|escape }}')">
+                                            <i class="fas fa-calendar-check"></i> Book Slot
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-footer text-muted">
+                                    <small>Posted {{ slot.posted_date.strftime('%d %b, %Y') if slot.posted_date else 'Recently' }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle fa-3x mb-3"></i>
+                            <h4>No Mentorship Slots Available</h4>
+                            <p>Check back later for new mentorship opportunities from alumni.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Confirmation Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Confirm Booking</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to book this mentorship slot?</p>
+                <div class="alert alert-info">
+                    <p><strong>Topic:</strong> <span id="modalTopic"></span></p>
+                    <p><strong>Mentor:</strong> <span id="modalMentor"></span></p>
+                </div>
+                <p class="small text-muted">
+                    <i class="fas fa-info-circle"></i> 
+                    You'll receive a confirmation email with meeting details.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="#" id="confirmBookingBtn" class="btn btn-success">Confirm Booking</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        min-height: 100vh;
+        color: white;
+        padding: 20px;
+    }
+    .sidebar a {
+        color: white;
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+        background: rgba(255,255,255,0.2);
+    }
+    .main-content {
+        padding: 30px;
+    }
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #48c78e 0%, #257953 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    .initials {
+        color: white;
+        font-size: 32px;
+        font-weight: bold;
+    }
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .alumni-details {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+    }
+</style>
+
+<script>
+    function confirmBooking(slotId, topic, mentor) {
+        document.getElementById('modalTopic').textContent = topic;
+        document.getElementById('modalMentor').textContent = mentor;
+        document.getElementById('confirmBookingBtn').href = '/student/book-slot/' + slotId;
+        var modal = new bootstrap.Modal(document.getElementById('bookingModal'));
+        modal.show();
+    }
+    
+    function filterSlots() {
+        var searchTopic = document.getElementById('searchTopic').value.toLowerCase();
+        var filterDate = document.getElementById('filterDate').value;
+        var filterAlumni = document.getElementById('filterAlumni').value.toLowerCase();
+        
+        var slots = document.getElementsByClassName('slot-card');
+        
+        for (var i = 0; i < slots.length; i++) {
+            var slot = slots[i];
+            var topic = slot.dataset.topic;
+            var date = slot.dataset.date;
+            var alumni = slot.dataset.alumni;
+            
+            var matchesTopic = topic.includes(searchTopic);
+            var matchesDate = filterDate === '' || date === filterDate;
+            var matchesAlumni = filterAlumni === '' || alumni.includes(filterAlumni);
+            
+            if (matchesTopic && matchesDate && matchesAlumni) {
+                slot.style.display = 'block';
+            } else {
+                slot.style.display = 'none';
+            }
+        }
+    }
+</script>
+{% endblock %}

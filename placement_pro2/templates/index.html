@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Placement Pro - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <h1>Placement Pro</h1>
+        <p class="lead">Your Complete Career Management Solution</p>
+    </div>
+</section>
+
+<!-- Role Selection -->
+<section class="section">
+    <div class="container">
+        <h2>Select Your Role</h2>
+        <div class="row">
+            <div class="col-md-3">
+                <a href="{{ url_for('auth.login') }}?role=tpo" class="role-card">
+                    <i class="fas fa-user-tie" style="color: #667eea;"></i>
+                    <h3>TPO Admin</h3>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('auth.login') }}?role=student" class="role-card">
+                    <i class="fas fa-user-graduate" style="color: #48c78e;"></i>
+                    <h3>Student</h3>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('auth.login') }}?role=alumni" class="role-card">
+                    <i class="fas fa-user-tie" style="color: #3e8ed0;"></i>
+                    <h3>Alumni</h3>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('auth.login') }}?role=analyst" class="role-card">
+                    <i class="fas fa-chart-line" style="color: #f48c06;"></i>
+                    <h3>Analyst</h3>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="section bg-light">
+    <div class="container">
+        <h2>About XYZ College of Engineering</h2>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card p-4">
+                    <p class="lead">XYZ College of Engineering, established in 2000, is one of India's premier engineering institutions. With a strong focus on academic excellence and industry partnerships, we have consistently achieved placement records of over 95% for the past decade.</p>
+                    <h5 class="mt-4">Our Placement Highlights:</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check-circle text-success me-2"></i>150+ Recruiting Companies Annually</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Highest Package: ₹45 LPA</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Average Package: ₹12 LPA</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>5000+ Alumni Network</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="section">
+    <div class="container">
+        <h2>Key Features</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-3">
+                    <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                    <h5>Criteria Engine</h5>
+                    <p>Intelligent filtering of eligible students</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-3">
+                    <i class="fas fa-file-alt fa-3x text-success mb-3"></i>
+                    <h5>Resume Wizard</h5>
+                    <p>Build professional resumes instantly</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-3">
+                    <i class="fas fa-handshake fa-3x text-info mb-3"></i>
+                    <h5>Alumni Connect</h5>
+                    <p>Job referrals and mentorship</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-3">
+                    <i class="fas fa-chart-pie fa-3x text-warning mb-3"></i>
+                    <h5>Skill Gap Analysis</h5>
+                    <p>Data-driven career preparation</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-3">
+                    <i class="fas fa-robot fa-3x text-danger mb-3"></i>
+                    <h5>PlacementBot 24/7</h5>
+                    <p>Instant answers to your queries</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 p-3">
+                    <i class="fas fa-calendar-alt fa-3x text-secondary mb-3"></i>
+                    <h5>Interview Scheduler</h5>
+                    <p>Hassle-free scheduling</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="section bg-light">
+    <div class="container">
+        <h2>Contact Us</h2>
+        <div class="row">
+            <div class="col-lg-6 mx-auto">
+                <div class="card p-4">
+                    <!-- Fixed: Removed method and action that were causing the error -->
+                    <form>
+                        <div class="mb-3">
+                            <input type="text" name="name" class="form-control" placeholder="Your Name">
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" name="email" class="form-control" placeholder="Your Email">
+                        </div>
+                        <div class="mb-3">
+                            <textarea name="message" class="form-control" rows="4" placeholder="Your Message"></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" onclick="alert('Contact form will be implemented soon!')">Send Message</button>
+                    </form>
+                    <hr>
+                    <div class="text-center">
+                        <p><i class="fas fa-envelope me-2"></i> placement@xyzcollege.edu</p>
+                        <p><i class="fas fa-phone me-2"></i> +91-1234567890</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

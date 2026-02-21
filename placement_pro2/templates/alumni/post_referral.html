@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Create Mentorship Slot - Placement Pro{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-handshake"></i> Create Mentorship Slot</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/alumni/create-mentorship" onsubmit="return validateMentorshipForm()">
+                        <div class="mb-3">
+                            <label class="form-label">Topic/Subject *</label>
+                            <input type="text" name="topic" class="form-control" required 
+                                   placeholder="e.g., Career Guidance, Technical Interview Prep, Resume Review">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Date *</label>
+                                <input type="date" name="date" class="form-control" required 
+                                       min="{{ now().strftime('%Y-%m-%d') }}">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Time Slot *</label>
+                                <select name="time_slot" class="form-select" required>
+                                    <option value="09:00-10:00">09:00 AM - 10:00 AM</option>
+                                    <option value="10:00-11:00">10:00 AM - 11:00 AM</option>
+                                    <option value="11:00-12:00">11:00 AM - 12:00 PM</option>
+                                    <option value="12:00-13:00">12:00 PM - 01:00 PM</option>
+                                    <option value="14:00-15:00">02:00 PM - 03:00 PM</option>
+                                    <option value="15:00-16:00">03:00 PM - 04:00 PM</option>
+                                    <option value="16:00-17:00">04:00 PM - 05:00 PM</option>
+                                    <option value="17:00-18:00">05:00 PM - 06:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="4" 
+                                      placeholder="Describe what you'll cover in this mentorship session..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Mode *</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="mode" id="online" value="online" checked>
+                                <label class="form-check-label" for="online">
+                                    <i class="fas fa-video"></i> Online (Google Meet/ Zoom)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="mode" id="offline" value="offline">
+                                <label class="form-check-label" for="offline">
+                                    <i class="fas fa-building"></i> Offline (Campus)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3" id="meetingLinkDiv">
+                            <label class="form-label">Meeting Link</label>
+                            <input type="url" name="meeting_link" class="form-control" 
+                                   placeholder="https://meet.google.com/xxx-xxxx-xxx">
+                        </div>
+                        
+                        <div class="mb-3" id="venueDiv" style="display: none;">
+                            <label class="form-label">Venue/Room Number</label>
+                            <input type="text" name="venue" class="form-control" 
+                                   placeholder="e.g., Placement Block, Room 101">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Maximum Students</label>
+                            <input type="number" name="max_students" class="form-control" value="1" min="1" max="10">
+                            <small class="text-muted">Number of students who can book this slot</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Target Audience</label>
+                            <select name="target_branch" class="form-select" multiple size="3">
+                                <option value="all">All Branches</option>
+                                <option value="CS">Computer Science</option>
+                                <option value="IT">Information Technology</option>
+                                <option value="ECE">Electronics</option>
+                                <option value="ME">Mechanical</option>
+                            </select>
+                            <small class="text-muted">Hold Ctrl to select multiple</small>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Your mentorship slot will be visible to eligible students. You'll receive an email when someone books it.
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-calendar-plus"></i> Create Mentorship Slot
+                            </button>
+                            <a href="/alumni/dashboard" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle between online and offline fields
+    document.querySelectorAll('[name="mode"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'online') {
+                document.getElementById('meetingLinkDiv').style.display = 'block';
+                document.getElementById('venueDiv').style.display = 'none';
+                document.querySelector('[name="venue"]').required = false;
+                document.querySelector('[name="meeting_link"]').required = true;
+            } else {
+                document.getElementById('meetingLinkDiv').style.display = 'none';
+                document.getElementById('venueDiv').style.display = 'block';
+                document.querySelector('[name="meeting_link"]').required = false;
+                document.querySelector('[name="venue"]').required = true;
+            }
+        });
+    });
+    
+    function validateMentorshipForm() {
+        const topic = document.querySelector('[name="topic"]').value;
+        const date = document.querySelector('[name="date"]').value;
+        
+        if (!topic || !date) {
+            alert('Please fill all required fields');
+            return false;
+        }
+        
+        return true;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Alumni Dashboard - Placement Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar" style="background: linear-gradient(135deg, #3e8ed0 0%, #1c4e7c 100%);">
+            <h4 class="mb-4"><i class="fas fa-user-tie"></i> Alumni</h4>
+            <a href="/alumni/dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/alumni/post-referral"><i class="fas fa-briefcase"></i> Post Job Referral</a>
+            <a href="/alumni/create-mentorship"><i class="fas fa-handshake"></i> Create Mentorship</a>
+            <a href="/logout"><i class="fas fa-sign-out"></i> Logout</a>
+        </div>
+        
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4">Welcome, {{ current_user.username }}!</h2>
+            
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Total Referrals Posted</h6>
+                            <h2>{{ referrals|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Mentorship Slots</h6>
+                            <h2>{{ slots|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Students Mentored</h6>
+                            <h2>{{ slots|selectattr('is_booked', 'equalto', true)|list|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Job Referrals Section -->
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-briefcase"></i> Your Job Referrals</h5>
+                            <a href="/alumni/post-referral" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Add New
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if referrals %}
+                                <div class="list-group">
+                                    {% for referral in referrals %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <h6 class="mb-1">{{ referral.position }}</h6>
+                                                    <p class="mb-1 text-muted">{{ referral.company }}</p>
+                                                    <small>Posted: {{ referral.posted_date.strftime('%d %b, %Y') }}</small>
+                                                </div>
+                                                <div>
+                                                    <a href="{{ referral.apply_link }}" target="_blank" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-external-link-alt"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted text-center py-3">No job referrals posted yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mentorship Slots Section -->
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-handshake"></i> Your Mentorship Slots</h5>
+                            <a href="/alumni/create-mentorship" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Create Slot
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if slots %}
+                                <div class="list-group">
+                                    {% for slot in slots %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <h6 class="mb-1">{{ slot.topic }}</h6>
+                                                    <p class="mb-1">
+                                                        <i class="fas fa-calendar"></i> {{ slot.date.strftime('%d %b, %Y') }}
+                                                    </p>
+                                                    <span class="badge {% if slot.is_booked %}bg-success{% else %}bg-info{% endif %}">
+                                                        {% if slot.is_booked %}Booked by {{ slot.student.username }}{% else %}Available{% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted text-center py-3">No mentorship slots created yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <a href="/alumni/post-referral" class="btn btn-outline-primary w-100 mb-2">
+                                        <i class="fas fa-plus-circle"></i> Post Referral
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="/alumni/create-mentorship" class="btn btn-outline-success w-100 mb-2">
+                                        <i class="fas fa-calendar-plus"></i> Create Mentorship
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="#" class="btn btn-outline-info w-100 mb-2">
+                                        <i class="fas fa-users"></i> View Students
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="#" class="btn btn-outline-warning w-100 mb-2">
+                                        <i class="fas fa-chart-bar"></i> Impact Report
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        min-height: 100vh;
+        color: white;
+        padding: 20px;
+    }
+    .sidebar a {
+        color: white;
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+    }
+    .sidebar a:hover, .sidebar a.active {
+        background: rgba(255,255,255,0.2);
+    }
+    .main-content {
+        padding: 30px;
+    }
+    .stat-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}

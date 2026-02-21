@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Skill Gap Analysis - Placement Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar" id="analyst-sidebar">
+            <h4 class="mb-4"><i class="fas fa-chart-line"></i> Analyst</h4>
+            <a href="/analyst/skill-gap-analysis" class="active"><i class="fas fa-chart-pie"></i> Skill Gap Analysis</a>
+            <a href="/logout"><i class="fas fa-sign-out"></i> Logout</a>
+        </div>
+        
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4">Skill Gap Analysis</h2>
+            
+            <!-- Role Selection -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-search"></i> Analyze Your Skills</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" id="roleForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Select Target Role</label>
+                                <select name="target_role" class="form-select" onchange="this.form.submit()">
+                                    <option value="Data Analyst" {% if target_role == 'Data Analyst' %}selected{% endif %}>Data Analyst</option>
+                                    <option value="Software Developer" {% if target_role == 'Software Developer' %}selected{% endif %}>Software Developer</option>
+                                    <option value="Web Developer" {% if target_role == 'Web Developer' %}selected{% endif %}>Web Developer</option>
+                                    <option value="Machine Learning" {% if target_role == 'Machine Learning' %}selected{% endif %}>Machine Learning Engineer</option>
+                                    <option value="DevOps" {% if target_role == 'DevOps' %}selected{% endif %}>DevOps Engineer</option>
+                                    <option value="Cloud Architect" {% if target_role == 'Cloud Architect' %}selected{% endif %}>Cloud Architect</option>
+                                    <option value="Cybersecurity" {% if target_role == 'Cybersecurity' %}selected{% endif %}>Cybersecurity Analyst</option>
+                                    <option value="Product Manager" {% if target_role == 'Product Manager' %}selected{% endif %}>Product Manager</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Required Skills -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-check-circle"></i> Required Skills for {{ target_role }}</h5>
+                        </div>
+                        <div class="card-body">
+                            {% set total_skills = required|length %}
+                            {% set current_skills = required|length - missing|length %}
+                            {% set percentage = (current_skills / total_skills * 100) if total_skills > 0 else 0 %}
+                            {% set percentage_int = percentage|int %}
+                            
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                                     role="progressbar"
+                                     data-percentage="{{ percentage_int }}"
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100"
+                                     aria-valuenow="{{ percentage_int }}">
+                                    {{ current_skills }}/{{ total_skills }} Skills
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                {% for skill in required %}
+                                    <div class="col-md-6 mb-2">
+                                        {% if skill in student_skills %}
+                                            <span class="badge bg-success p-2">
+                                                <i class="fas fa-check"></i> {{ skill }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark p-2">
+                                                <i class="fas fa-times text-danger"></i> {{ skill }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Your Skills -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-user"></i> Your Current Skills</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if student_skills %}
+                                <div class="mb-3">
+                                    {% for skill in student_skills %}
+                                        <span class="badge bg-info p-2 m-1">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No skills added yet. <a href="/student/build-resume">Update your resume</a></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Skill Gap Analysis -->
+            {% if missing %}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Skills to Learn ({{ missing|length }})</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for skill in missing %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 border-danger">
+                                    <div class="card-header bg-danger text-white">
+                                        <h6 class="mb-0">{{ skill }}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small">Recommended Learning Resources:</p>
+                                        <div class="list-group">
+                                            <a href="https://www.coursera.org/courses?query={{ skill }}" 
+                                               target="_blank" class="list-group-item list-group-item-action">
+                                                <i class="fab fa-coursera text-primary"></i> Coursera
+                                            </a>
+                                            <a href="https://www.udemy.com/courses/search/?q={{ skill }}" 
+                                               target="_blank" class="list-group-item list-group-item-action">
+                                                <i class="fab fa-udemy text-danger"></i> Udemy
+                                            </a>
+                                            <a href="https://www.youtube.com/results?search_query={{ skill }}+tutorial" 
+                                               target="_blank" class="list-group-item list-group-item-action">
+                                                <i class="fab fa-youtube text-danger"></i> YouTube
+                                            </a>
+                                            <a href="https://www.linkedin.com/learning/search?keywords={{ skill }}" 
+                                               target="_blank" class="list-group-item list-group-item-action">
+                                                <i class="fab fa-linkedin text-primary"></i> LinkedIn Learning
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Learning Path -->
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-road"></i> Recommended Learning Path</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for skill in missing %}
+                            <div class="timeline-item">
+                                <div class="timeline-badge bg-success">
+                                    {{ loop.index }}
+                                </div>
+                                <div class="timeline-content">
+                                    <h6>Step {{ loop.index }}: Learn {{ skill }}</h6>
+                                    <p class="text-muted">
+                                        <i class="fas fa-clock"></i> Estimated time: 2-4 weeks<br>
+                                        <i class="fas fa-star"></i> Priority: 
+                                        {% if loop.index <= 3 %}
+                                            <span class="badge bg-danger">High</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Medium</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+                {% if student_skills %}
+                    <div class="alert alert-success text-center">
+                        <i class="fas fa-trophy fa-3x mb-3"></i>
+                        <h4>Congratulations!</h4>
+                        <p>You have all the required skills for {{ target_role }}!</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    #analyst-sidebar {
+        min-height: 100vh;
+        color: white;
+        padding: 20px;
+        background: linear-gradient(135deg, #f48c06 0%, #dc3545 100%);
+    }
+    #analyst-sidebar a {
+        color: white;
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+    }
+    #analyst-sidebar a:hover,
+    #analyst-sidebar a.active {
+        background: rgba(255,255,255,0.2);
+    }
+    .main-content {
+        padding: 30px;
+    }
+    .progress {
+        height: 25px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+    }
+    .progress-bar {
+        transition: width 0.6s ease;
+    }
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    .timeline-item {
+        position: relative;
+        padding-left: 50px;
+        margin-bottom: 30px;
+    }
+    .timeline-badge {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: #28a745;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    .timeline-content {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+</style>
+
+<script>
+    // Set progress bar widths dynamically
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit when role changes
+        var roleSelect = document.querySelector('[name="target_role"]');
+        if (roleSelect) {
+            roleSelect.addEventListener('change', function() {
+                document.getElementById('roleForm').submit();
+            });
+        }
+        
+        // Set progress bar widths
+        var progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(function(bar) {
+            var percentage = bar.getAttribute('data-percentage');
+            if (percentage) {
+                bar.style.width = percentage + '%';
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar">
+            <h4 class="mb-4"><i class="fas fa-briefcase"></i> Placement Pro</h4>
+            <a href="/tpo/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/tpo/criteria-engine"><i class="fas fa-cogs"></i> Criteria Engine</a>
+            <a href="/tpo/calendar"><i class="fas fa-calendar"></i> Calendar</a>
+            <a href="/logout"><i class="fas fa-sign-out"></i> Logout</a>
+        </div>
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4">TPO Dashboard</h2>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h5>Total Drives</h5>
+                        <h2>{{ drives|length }}</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h5>Active Drives</h5>
+                        <h2>{{ drives|selectattr('drive_date', 'ge', now())|list|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Recent Drives</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Drive Name</th>
+                                <th>Company</th>
+                                <th>Min CGPA</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for drive in drives %}
+                            <tr>
+                                <td>{{ drive.name }}</td>
+                                <td>{{ drive.company }}</td>
+                                <td>{{ drive.min_cgpa }}</td>
+                                <td>{{ drive.drive_date.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

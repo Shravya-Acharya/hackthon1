@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Job Referrals - Placement Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar" style="background: linear-gradient(135deg, #48c78e 0%, #257953 100%);">
+            <h4 class="mb-4"><i class="fas fa-user-graduate"></i> Student</h4>
+            <a href="/student/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/student/build-resume"><i class="fas fa-file-alt"></i> Build Resume</a>
+            <a href="/student/live-feed"><i class="fas fa-rss"></i> Live Feed</a>
+            <a href="/student/application-tracker"><i class="fas fa-chart-line"></i> Applications</a>
+            <a href="/student/job-referrals" class="active"><i class="fas fa-briefcase"></i> Job Referrals</a>
+            <a href="/student/mentorship-slots"><i class="fas fa-handshake"></i> Mentorship</a>
+            <a href="/analyst/skill-gap-analysis"><i class="fas fa-chart-pie"></i> Skill Gap</a>
+            <a href="/logout"><i class="fas fa-sign-out"></i> Logout</a>
+        </div>
+        
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4">Job Referrals from Alumni</h2>
+            
+            <!-- Search and Filter -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="searchCompany" placeholder="Search company..." onkeyup="filterReferrals()">
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="filterPosition" onchange="filterReferrals()">
+                                <option value="">All Positions</option>
+                                {% for referral in referrals %}
+                                    <option value="{{ referral.position }}">{{ referral.position }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="sortBy" onchange="sortReferrals()">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="company">Company Name</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Referrals Grid -->
+            <div class="row" id="referralsContainer">
+                {% if referrals %}
+                    {% for referral in referrals %}
+                        {% set alumni = referral.alumni %}
+                        <div class="col-md-6 mb-4 referral-card" 
+                             data-company="{{ referral.company|lower }}"
+                             data-position="{{ referral.position|lower }}"
+                             data-date="{{ referral.posted_date.strftime('%Y%m%d') }}">
+                            <div class="card h-100 shadow">
+                                <div class="card-header bg-primary text-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0"><i class="fas fa-briefcase"></i> {{ referral.position }}</h5>
+                                        <span class="badge bg-light text-dark">{{ referral.company }}</span>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 text-center">
+                                            <div class="avatar-circle mb-2">
+                                                <span class="initials">{{ alumni.username[:2]|upper }}</span>
+                                            </div>
+                                            <p class="small mb-0">{{ alumni.username }}</p>
+                                            <span class="badge bg-info">Alumni</span>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <p class="mb-2">{{ referral.description }}</p>
+                                            <p class="text-muted small">
+                                                <i class="fas fa-calendar me-2"></i> Posted: {{ referral.posted_date.strftime('%d %b, %Y') }}
+                                            </p>
+                                            
+                                            <div class="mt-3">
+                                                <a href="{{ referral.apply_link }}" target="_blank" class="btn btn-success btn-sm">
+                                                    <i class="fas fa-external-link-alt"></i> Apply Now
+                                                </a>
+                                                <button class="btn btn-outline-primary btn-sm" onclick="contactAlumni('{{ alumni.id }}')">
+                                                    <i class="fas fa-envelope"></i> Contact Alumni
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle fa-3x mb-3"></i>
+                            <h4>No Job Referrals Available</h4>
+                            <p>Check back later for new job referrals from alumni.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        min-height: 100vh;
+        color: white;
+        padding: 20px;
+    }
+    .sidebar a {
+        color: white;
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+        background: rgba(255,255,255,0.2);
+    }
+    .main-content {
+        padding: 30px;
+    }
+    .avatar-circle {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #48c78e 0%, #257953 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    .initials {
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    function filterReferrals() {
+        var searchCompany = document.getElementById('searchCompany').value.toLowerCase();
+        var filterPosition = document.getElementById('filterPosition').value.toLowerCase();
+        
+        var referrals = document.getElementsByClassName('referral-card');
+        
+        for (var i = 0; i < referrals.length; i++) {
+            var referral = referrals[i];
+            var company = referral.getAttribute('data-company');
+            var position = referral.getAttribute('data-position');
+            
+            var matchesCompany = company.indexOf(searchCompany) > -1;
+            var matchesPosition = filterPosition === '' || position.indexOf(filterPosition) > -1;
+            
+            if (matchesCompany && matchesPosition) {
+                referral.style.display = 'block';
+            } else {
+                referral.style.display = 'none';
+            }
+        }
+    }
+    
+    function sortReferrals() {
+        var sortBy = document.getElementById('sortBy').value;
+        var container = document.getElementById('referralsContainer');
+        var referrals = Array.from(document.getElementsByClassName('referral-card'));
+        
+        referrals.sort(function(a, b) {
+            var aCompany = a.getAttribute('data-company');
+            var bCompany = b.getAttribute('data-company');
+            var aDate = parseInt(a.getAttribute('data-date'));
+            var bDate = parseInt(b.getAttribute('data-date'));
+            
+            if (sortBy === 'company') {
+                if (aCompany < bCompany) return -1;
+                if (aCompany > bCompany) return 1;
+                return 0;
+            } else if (sortBy === 'newest') {
+                return bDate - aDate;
+            } else if (sortBy === 'oldest') {
+                return aDate - bDate;
+            }
+            return 0;
+        });
+        
+        container.innerHTML = '';
+        for (var i = 0; i < referrals.length; i++) {
+            container.appendChild(referrals[i]);
+        }
+    }
+    
+    function contactAlumni(alumniId) {
+        alert('Contact feature coming soon! You can reach out to alumni through the mentorship program.');
+    }
+</script>
+{% endblock %}

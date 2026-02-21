@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Drives You're Eligible For</h2>
+    <div class="row">
+        {% for drive in drives %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5>{{ drive.name }}</h5>
+                    <p>Company: {{ drive.company }}</p>
+                    <p>Date: {{ drive.drive_date.strftime('%Y-%m-%d') }}</p>
+                    <p>Min CGPA: {{ drive.min_cgpa }}</p>
+                    {% set applied = namespace(value=false) %}
+                    {% for app in current_user.applications %}
+                        {% if app.drive_id == drive.id %}
+                            {% set applied.value = true %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if applied.value %}
+                        <span class="badge bg-success">Applied</span>
+                    {% else %}
+                        <a href="/student/apply-drive/{{ drive.id }}" class="btn btn-primary">Apply Now</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Application Tracker - Placement Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar" style="background: linear-gradient(135deg, #48c78e 0%, #257953 100%);">
+            <h4 class="mb-4"><i class="fas fa-user-graduate"></i> Student</h4>
+            <a href="/student/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/student/build-resume"><i class="fas fa-file-alt"></i> Build Resume</a>
+            <a href="/student/live-feed"><i class="fas fa-rss"></i> Live Feed</a>
+            <a href="/student/application-tracker" class="active"><i class="fas fa-chart-line"></i> Applications</a>
+            <a href="/student/job-referrals"><i class="fas fa-briefcase"></i> Job Referrals</a>
+            <a href="/student/mentorship-slots"><i class="fas fa-handshake"></i> Mentorship</a>
+            <a href="/analyst/skill-gap-analysis"><i class="fas fa-chart-pie"></i> Skill Gap</a>
+            <a href="/logout"><i class="fas fa-sign-out"></i> Logout</a>
+        </div>
+        
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4">Application Tracker</h2>
+            
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Total Applications</h6>
+                            <h2>{{ applications|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Under Review</h6>
+                            <h2>
+                                {% set review_count = 0 %}
+                                {% for app in applications %}
+                                    {% if app.status == 'Applied' %}
+                                        {% set review_count = review_count + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ review_count }}
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Shortlisted</h6>
+                            <h2>
+                                {% set shortlisted_count = 0 %}
+                                {% for app in applications %}
+                                    {% if app.status == 'Shortlisted' %}
+                                        {% set shortlisted_count = shortlisted_count + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ shortlisted_count }}
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Selected</h6>
+                            <h2>
+                                {% set selected_count = 0 %}
+                                {% for app in applications %}
+                                    {% if app.status == 'Selected' %}
+                                        {% set selected_count = selected_count + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ selected_count }}
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Applications Table -->
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Your Applications</h5>
+                </div>
+                <div class="card-body">
+                    {% if applications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Drive Name</th>
+                                        <th>Company</th>
+                                        <th>Applied Date</th>
+                                        <th>Status</th>
+                                        <th>Interview Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in applications %}
+                                        {% set drive = app.drive %}
+                                        <tr>
+                                            <td>{{ drive.name }}</td>
+                                            <td>{{ drive.company }}</td>
+                                            <td>{{ app.applied_date.strftime('%d %b, %Y') }}</td>
+                                            <td>
+                                                {% if app.status == 'Applied' %}
+                                                    <span class="badge bg-info">Applied</span>
+                                                {% elif app.status == 'Shortlisted' %}
+                                                    <span class="badge bg-primary">Shortlisted</span>
+                                                {% elif app.status == 'Interview Scheduled' %}
+                                                    <span class="badge bg-warning">Interview Scheduled</span>
+                                                {% elif app.status == 'Selected' %}
+                                                    <span class="badge bg-success">Selected</span>
+                                                {% elif app.status == 'Rejected' %}
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ app.status }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if app.interview_date %}
+                                                    {{ app.interview_date.strftime('%d %b, %Y') }}
+                                                {% else %}
+                                                    <span class="text-muted">Not scheduled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="viewDetails('{{ app.id }}')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
+                            <h5>No Applications Yet</h5>
+                            <p>Check Live Feed for upcoming drives and apply!</p>
+                            <a href="/student/live-feed" class="btn btn-success">
+                                <i class="fas fa-rss"></i> Go to Live Feed
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Timeline View -->
+            {% if applications %}
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Application Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for app in applications[:5] %}
+                            {% set drive = app.drive %}
+                            <div class="timeline-item">
+                                <div class="timeline-badge {% if loop.first %}bg-success{% else %}bg-info{% endif %}">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h6>{{ drive.company }} - {{ drive.name }}</h6>
+                                    <p class="text-muted">
+                                        Applied on {{ app.applied_date.strftime('%d %b, %Y') }} • 
+                                        Current Status: {{ app.status }}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        min-height: 100vh;
+        color: white;
+        padding: 20px;
+    }
+    .sidebar a {
+        color: white;
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+        background: rgba(255,255,255,0.2);
+    }
+    .main-content {
+        padding: 30px;
+    }
+    .stat-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    .timeline-item {
+        position: relative;
+        padding-left: 50px;
+        margin-bottom: 30px;
+    }
+    .timeline-badge {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+    .timeline-content {
+        padding: 10px 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+</style>
+
+<script>
+    function viewDetails(appId) {
+        alert('Application details for ID: ' + appId + ' coming soon!');
+    }
+</script>
+{% endblock %}

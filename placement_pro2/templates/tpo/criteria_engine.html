@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Criteria Engine - Placement Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <h4 class="mb-4"><i class="fas fa-briefcase"></i> TPO Admin</h4>
+            <a href="/tpo/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/tpo/criteria-engine" class="active"><i class="fas fa-cogs"></i> Criteria Engine</a>
+            <a href="/tpo/calendar"><i class="fas fa-calendar"></i> Calendar</a>
+            <a href="/logout"><i class="fas fa-sign-out"></i> Logout</a>
+        </div>
+        
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4">Criteria Engine - Create New Drive</h2>
+            
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Placement Drive Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" onsubmit="return validateForm()">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Drive Name *</label>
+                                <input type="text" name="drive_name" class="form-control" required 
+                                       placeholder="e.g., Infosys Campus Drive 2024">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Company Name *</label>
+                                <input type="text" name="company" class="form-control" required 
+                                       placeholder="e.g., Infosys">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Minimum CGPA *</label>
+                                <input type="number" step="0.1" min="0" max="10" name="min_cgpa" 
+                                       class="form-control" required placeholder="e.g., 7.5">
+                                <small class="text-muted">Between 0 and 10</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Backlogs Allowed *</label>
+                                <input type="number" min="0" max="5" name="backlogs_allowed" 
+                                       class="form-control" required placeholder="e.g., 0">
+                                <small class="text-muted">Maximum backlogs allowed</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Drive Date *</label>
+                                <input type="date" name="drive_date" class="form-control" required 
+                                       min="{{ now().strftime('%Y-%m-%d') }}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Eligible Branches *</label>
+                            <select name="branches" class="form-select" required multiple size="4">
+                                <option value="CS">Computer Science (CS)</option>
+                                <option value="IT">Information Technology (IT)</option>
+                                <option value="ECE">Electronics & Communication (ECE)</option>
+                                <option value="EEE">Electrical & Electronics (EEE)</option>
+                                <option value="ME">Mechanical Engineering (ME)</option>
+                                <option value="CE">Civil Engineering (CE)</option>
+                                <option value="MCA">MCA</option>
+                                <option value="MBA">MBA</option>
+                            </select>
+                            <small class="text-muted">Hold Ctrl to select multiple branches</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Additional Requirements</label>
+                            <textarea name="requirements" class="form-control" rows="3" 
+                                      placeholder="Any specific skills or requirements..."></textarea>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6><i class="fas fa-info-circle"></i> Eligibility Summary</h6>
+                                        <p class="small mb-1">Students must meet:</p>
+                                        <ul class="small">
+                                            <li>Minimum CGPA requirement</li>
+                                            <li>Maximum backlog limit</li>
+                                            <li>Selected branch(es)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-search"></i> Check Eligibility
+                                </button>
+                                <a href="/tpo/dashboard" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        min-height: 100vh;
+        color: white;
+        padding: 20px;
+    }
+    .sidebar a {
+        color: white;
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+    }
+    .sidebar a:hover, .sidebar a.active {
+        background: rgba(255,255,255,0.2);
+    }
+    .main-content {
+        padding: 30px;
+    }
+</style>
+
+<script>
+    function validateForm() {
+        const minCgpa = document.querySelector('[name="min_cgpa"]').value;
+        const backlogs = document.querySelector('[name="backlogs_allowed"]').value;
+        const branches = document.querySelector('[name="branches"]').selectedOptions;
+        
+        if (branches.length === 0) {
+            alert('Please select at least one branch');
+            return false;
+        }
+        
+        if (minCgpa < 0 || minCgpa > 10) {
+            alert('CGPA must be between 0 and 10');
+            return false;
+        }
+        
+        if (backlogs < 0) {
+            alert('Backlogs cannot be negative');
+            return false;
+        }
+        
+        return true;
+    }
+</script>
+{% endblock %}

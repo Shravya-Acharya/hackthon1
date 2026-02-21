@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Placement Pro{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="login-card">
+                <h2 class="text-center mb-4">Login</h2>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" required pattern="[a-zA-Z0-9]+" title="Only letters and numbers">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required pattern="[0-9]+" title="Only numbers">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select name="role" class="form-select" required>
+                            <option value="tpo">TPO Admin</option>
+                            <option value="student">Student</option>
+                            <option value="alumni">Alumni</option>
+                            <option value="analyst">Analyst</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+                <p class="text-center mt-3">
+                    Don't have account? <a href="/signup">Sign Up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
